@@ -14,7 +14,24 @@ function App() {
   const [input, setInput] = useState("");
   const [box, setBox] = useState({});
   const [route, setRoute] = useState("signIn");
-  const [isSignedIn, setIsSignedIn] = useState(false); 
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [user, setUser] = useState({
+    id: "",
+    name: "",
+    email: "",
+    entries: 0,
+    joined: "",
+  });
+
+  const loadUser = (data) => {
+    setUser({
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      entries: data.entries,
+      joined: data.joined,
+    });
+  };
 
   //Personal access token for Clarifai API
   const PAT = "876f3f1773944f1da373eb31e465b2fb";
@@ -44,7 +61,7 @@ function App() {
 
   const onButtonSubmit = () => {
     setImageUrl(input);
-    
+
     const IMAGE_URL = input;
 
     const raw = JSON.stringify({
@@ -81,8 +98,9 @@ function App() {
       `https://api.clarifai.com/v2/models/face-detection/versions/6dc7e46bc9124c5c8824be4822abe105/outputs`,
       requestOptions
     )
-      .then((response) => response.json())
+      .then((response) => response.json()) // Parse the response from the Clarifai API call
       .then((data) => {
+        // Call calculateFaceLocation with the Clarifai API response
         displayFaceBox(calculateFaceLocation(data));
         const boundingBox =
           data.outputs[0]?.data?.regions[0]?.region_info?.bounding_box;
@@ -91,14 +109,43 @@ function App() {
         } else {
           console.log("Bounding box not found in the response");
         }
+
+        // After processing the Clarifai API response, make the PUT request
+        if (data) {
+          // Check if the response is successful
+          return fetch("http://localhost:3000/image", {
+            method: "PUT",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json", // Add the Content-Type header for JSON data
+            },
+            body: JSON.stringify({
+              id: user.id,
+            }),
+          });
+        } else {
+          // Handle unsuccessful response, if needed
+          console.log("Response not successful");
+          console.log('USER ID--->', user.id)
+          throw new Error("Response not successful");
+        }
+      })
+      .then((response) => response.json()) // Parse the response from the PUT request
+      .then((count) => {
+        // Process the response from the PUT request, if needed
+        // Update the 'user' state with the updated 'entries' value
+        setUser((prevState) => ({
+          ...prevState,
+          entries: count, 
+        }));
       })
       .catch((error) => console.log("Error:", error));
   };
 
   const onRouteChange = (route) => {
-    if (route === 'signout') {
-      setIsSignedIn(false); 
-    } else if (route === 'home') {
+    if (route === "signout") {
+      setIsSignedIn(false);
+    } else if (route === "home") {
       setIsSignedIn(true);
     }
     setRoute(route);
@@ -111,7 +158,7 @@ function App() {
       {route === "home" ? (
         <div>
           <Logo />
-          <Rank />
+          <Rank name={user.name} entries={user.entries} />
           <ImageLinkForm
             onInputChange={onInputChange}
             onButtonSubmit={onButtonSubmit}
@@ -119,9 +166,9 @@ function App() {
           <FaceRecognition box={box} imageUrl={imageUrl} />
         </div>
       ) : route === "signIn" ? (
-        <SignIn onRouteChange={onRouteChange} />
+        <SignIn onRouteChange={onRouteChange} loadUser={loadUser} />
       ) : (
-        <Register onRouteChange={onRouteChange} />
+        <Register onRouteChange={onRouteChange} loadUser={loadUser} />
       )}
     </div>
   );
