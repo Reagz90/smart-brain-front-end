@@ -9,6 +9,21 @@ import Register from "./components/Register/Register";
 import ParticlesBg from "particles-bg";
 import React, { useState } from "react";
 
+const initialState = {
+  input: "",
+  imageUrl: "",
+  box: {},
+  route: "signin",
+  isSignedIn: false,
+  user: {
+    id: "",
+    name: "",
+    email: "",
+    entries: 0,
+    joined: "",
+  },
+};
+
 function App() {
   const [imageUrl, setImageUrl] = useState("");
   const [input, setInput] = useState("");
@@ -22,6 +37,15 @@ function App() {
     entries: 0,
     joined: "",
   });
+
+  const resetState = () => {
+    setInput(initialState.input);
+    setImageUrl(initialState.imageUrl);
+    setBox(initialState.box);
+    setRoute(initialState.route);
+    setIsSignedIn(initialState.isSignedIn);
+    setUser(initialState.user);
+  };
 
   const loadUser = (data) => {
     setUser({
@@ -126,7 +150,7 @@ function App() {
         } else {
           // Handle unsuccessful response, if needed
           console.log("Response not successful");
-          console.log('USER ID--->', user.id)
+          console.log("USER ID--->", user.id);
           throw new Error("Response not successful");
         }
       })
@@ -136,7 +160,7 @@ function App() {
         // Update the 'user' state with the updated 'entries' value
         setUser((prevState) => ({
           ...prevState,
-          entries: count, 
+          entries: count,
         }));
       })
       .catch((error) => console.log("Error:", error));
@@ -144,7 +168,7 @@ function App() {
 
   const onRouteChange = (route) => {
     if (route === "signout") {
-      setIsSignedIn(false);
+      resetState();
     } else if (route === "home") {
       setIsSignedIn(true);
     }
