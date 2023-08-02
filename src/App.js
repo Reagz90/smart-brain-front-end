@@ -87,7 +87,7 @@ function App() {
     // https://api.clarifai.com/v2/models/{YOUR_MODEL_ID}/outputs
     // this will default to the latest version_id
 
-    fetch("http://localhost:3000/imageurl", {
+    fetch("https://smart-brain-api-znne.onrender.com/imageurl", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -112,7 +112,7 @@ function App() {
         // After processing the Clarifai API response, make the PUT request
         if (data) {
           // Check if the response is successful
-          return fetch("http://localhost:3000/image", {
+          return fetch("https://smart-brain-api-znne.onrender.com/image", {
             method: "PUT",
             headers: {
               Accept: "application/json",
