@@ -33,7 +33,8 @@ const Register = ({ onRouteChange, loadUser }) => {
           loadUser(user);
           onRouteChange("home");
         }
-      });
+      })
+      .catch((err) => console.error('Error on register api call: ' + err));
   };
 
   return (
